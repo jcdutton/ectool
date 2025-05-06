@@ -59,7 +59,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $SHORTSHA-a-${{ vars.SHORTSHA }}
+          tag_name: $SHORTSHA
           release_name: Release ${{ vars.shortSha }}
           draft: false
           prerelease: false
