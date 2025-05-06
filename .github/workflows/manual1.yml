@@ -1,0 +1,70 @@
+name: Manual Build Windows/x64
+
+on:
+  workflow_dispatch:
+    inputs:
+      manualbranch:
+        description: 'Enter branch'
+        required: true
+        default: 'main'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository with Submodules
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.manualbranch }}
+          submodules: recursive
+
+      - name: Create Build Directory
+        run: mkdir _build
+
+      - name: Configure with CMake
+        shell: pwsh
+        run: |
+          cd _build
+          & cmake -A x64 -T ClangCL ..
+
+      - name: Build with CMake
+        shell: pwsh
+        run: |
+          cd _build
+          & cmake --build . --config RelWithDebInfo --parallel
+
+      - name: Upload Build Artifacts
+        id: upload-build-artifacts 
+        uses: actions/upload-artifact@v4
+        with:
+          name: ectool
+          path: |
+            _build/src/RelWithDebInfo/ectool.exe
+            _build/src/RelWithDebInfo/ectool.pdb
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: |
+            _build/src/RelWithDebInfo/ectool.exe
+            _build/src/RelWithDebInfo/ectool.pdb
+          asset_name: ectool-windows-amd64-${{ github.event.inputs.manualbranch }}.zip
+          asset_content_type: application/zip
+
+
