@@ -34,6 +34,7 @@ jobs:
           & cmake --build . --config RelWithDebInfo --parallel
 
       - name: Upload Build Artifacts
+        id: upload-build-artifacts 
         uses: actions/upload-artifact@v4
         with:
           name: ectool
@@ -59,7 +60,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: _build/src/RelWithDebInfo/ectool.exe
+          asset_path: |
+            _build/src/RelWithDebInfo/ectool.exe
+            _build/src/RelWithDebInfo/ectool.pdb
           asset_name: ectool-windows-amd64.zip
           asset_content_type: application/zip
 
