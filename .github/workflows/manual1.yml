@@ -53,16 +53,17 @@ jobs:
           echo "STORTSHA=$shortSha" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
           echo "vars.STORTSHA=$shortSha" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
           $env:shortSha = $shortSha
+          "SELECTED_COLOR=$shortSha" >> $env:GITHUB_OUTPUT
           Write-Output "Short SHA: $shortSha"
 
       - name: Set color
         id: color-selector
         run: |
-            "SELECTED_COLOR=green" >> $env:GITHUB_OUTPUT
+            "SELECTED_COLOR2=green" >> $env:GITHUB_OUTPUT
 
       - name: Get color
         env:
-          SELECTED_COLOR: ${{ steps.color-selector.outputs.SELECTED_COLOR }}
+          SELECTED_COLOR: ${{ steps.short_sha_8.outputs.SELECTED_COLOR }}
         run: Write-Output "The selected color is $env:SELECTED_COLOR"
 
       - name: Create Release
@@ -72,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: $SHORTSHA
-          release_name: Release aa-${{ steps.color-selector.outputs.SELECTED_COLOR }}-bb
+          release_name: Release aa-${{ steps.short_sha_8.outputs.SELECTED_COLOR }}-bb
           draft: false
           prerelease: false
 
