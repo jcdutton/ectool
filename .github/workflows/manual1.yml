@@ -44,7 +44,10 @@ jobs:
             _build/src/RelWithDebInfo/ectool.pdb
 
       - name: Diag
-        run: dir _build/src/RelWithDebInfo
+        run: |
+          cd _build/src/RelWithDebInfo
+          zip ectool.zip ectool.exe ectool.pdb
+          dir
 
       - name: Create Release
         id: create_release
