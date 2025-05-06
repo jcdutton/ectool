@@ -43,6 +43,9 @@ jobs:
             _build/src/RelWithDebInfo/ectool.exe
             _build/src/RelWithDebInfo/ectool.pdb
 
+      - name: Diag
+        run: dir _build/src/RelWithDebInfo
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
