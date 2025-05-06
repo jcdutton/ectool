@@ -72,7 +72,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $SHORTSHA
+          tag_name: ${{ steps.short_sha_8.outputs.SELECTED_COLOR }}
           release_name: Release aa-${{ steps.short_sha_8.outputs.SELECTED_COLOR }}-bb
           draft: false
           prerelease: false
@@ -85,7 +85,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: _build/src/RelWithDebInfo/ectool.zip
-          asset_name: ectool-windows-amd64-$shortSha.zip
+          asset_name: ectool-windows-amd64-${{ steps.short_sha_8.outputs.SELECTED_COLOR }}.zip
           asset_content_type: application/zip
 
 
