@@ -46,7 +46,7 @@ jobs:
       - name: Diag
         run: |
           cd _build/src/RelWithDebInfo
-          zip ectool.zip ectool.exe ectool.pdb
+          Compress-Archive -Path "ectool.exe","ectool.pdb" -DestinationPath ectool.zip
           dir
 
       - name: Create Release
