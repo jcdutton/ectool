@@ -48,7 +48,7 @@ jobs:
           cd _build/src/RelWithDebInfo
           Compress-Archive -Path "ectool.exe","ectool.pdb" -DestinationPath ectool.zip
           dir
-          $shortSha = $env:GITHUB_SHA.Substring(0,7)
+          $shortSha = $env:GITHUB_SHA.Substring(0,8)
           $env:shortSha = $shortSha
           Write-Output "Short SHA: $shortSha"
 
@@ -58,8 +58,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $shortSha
-          release_name: Release $shortSha
+          tag_name: ${{ vars.shortSha }}
+          release_name: Release ${{ vars.$shortSha }}
           draft: false
           prerelease: false
 
