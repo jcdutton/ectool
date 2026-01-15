@@ -82,6 +82,8 @@ const char help_str[] =
 	"      Issue AP reset\n"
 	"  autofanctrl <on>\n"
 	"      Turn on automatic fan speed control.\n"
+	"  baystatus\n"
+	"      Show bay status\n"
 	"  backlight <enabled>\n"
 	"      Enable/disable LCD backlight\n"
 	"  basestate [attach | detach | reset]\n"
@@ -2159,6 +2161,19 @@ static int sysinfo(struct ec_response_sysinfo *info)
 	return 0;
 }
 
+static int bay_status(struct ec_response_expansion_bay_status *info)
+{
+	int rv;
+
+	rv = ec_command(EC_CMD_EXPANSION_BAY_STATUS, 0, NULL, 0, info, sizeof(*info));
+	if (rv < 0) {
+		fprintf(stderr, "ERROR: EC_CMD_EXPANSION_BAY_STATUS failed: %d\n", rv);
+		return rv;
+	}
+
+	return 0;
+}
+
 const char *ec_image_to_string(uint32_t copy)
 {
         static const char *const image_names[] = { "unknown", "RO", "RW",
@@ -2289,6 +2304,54 @@ sysinfo_error_usage:
 	fprintf(stderr,
 		"Usage: %s "
 		"[flags|reset_flags|firmware_copy]\n",
+		argv[0]);
+	return -1;
+}
+
+
+
+
+int cmd_bay_status(int argc, char **argv)
+{
+	struct ec_response_expansion_bay_status r;
+	const char *module_enabled = "";
+	const char *module_fault = "";
+	const char *module_hatch_closed = "";
+
+	if (argc != 1)
+		goto sysinfo_error_usage;
+
+	memset(&r, '\0', sizeof(r));
+	if (bay_status(&r) != 0)
+		return -1;
+	if (r.state & 1) {
+		module_enabled = "Module:     Present";
+	} else {
+		module_enabled = "Module:     Absent";
+	}
+	if (r.state & 2) {
+		module_fault = "Fault:      Detected";
+	} else {
+		module_fault = "Fault:      None";
+	}
+	if (r.state & 4) {
+		module_hatch_closed = "Hatch:      Closed";
+	} else {
+		module_hatch_closed = "Hatch:      Open";
+	}
+
+	printf("State:      0x%08x:\n", r.state);
+	printf("%s\n", module_enabled);
+	printf("%s\n", module_fault);
+	printf("%s\n", module_hatch_closed);
+	printf("Board_ID_0: %d (0x%08x)\n", r.board_id_0, r.board_id_0);
+	printf("Board_ID_1: %d (0x%08x)\n", r.board_id_1, r.board_id_1);
+
+	return 0;
+
+sysinfo_error_usage:
+	fprintf(stderr,
+		"Usage: %s\n",
 		argv[0]);
 	return -1;
 }
@@ -12010,6 +12073,7 @@ const struct command commands[] = {
 	{ "addentropy", cmd_add_entropy },
 	{ "apreset", cmd_apreset },
 	{ "autofanctrl", cmd_thermal_auto_fan_ctrl },
+	{ "baystatus", cmd_bay_status },
 	{ "backlight", cmd_lcd_backlight },
 	{ "basestate", cmd_basestate },
 	{ "battery", cmd_battery },
