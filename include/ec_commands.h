@@ -7392,6 +7392,22 @@ struct ec_params_rgbkbd_set_color {
 #define EC_CMD_CR51_LAST 0x03FF
 
 /*****************************************************************************/
+
+/*
+ * The SBS defines a string object as a block of chars, 32 byte maximum, where
+ * the first byte indicates the number of chars in the block (excluding the
+ * first byte).
+ *
+ * Thus, the actual string length (i.e. the value strlen returns) is limited to
+ * 31 (=SBS_MAX_STR_SIZE).
+ *
+ * SBS_MAX_STR_OBJ_SIZE can be used as the size of a buffer for an SBS string
+ * object but also as a buffer for a c-lang string because the null terminating
+ * char also takes one byte.
+ */
+#define SBS_MAX_STR_SIZE 31
+#define SBS_MAX_STR_OBJ_SIZE (SBS_MAX_STR_SIZE + 1)
+
 /* Fingerprint MCU commands: range 0x0400-0x040x */
 
 /* Fingerprint SPI sensor passthru command: prototyping ONLY */
@@ -7747,6 +7763,32 @@ struct ec_response_battery_static_info_v1 {
 	char model_ext[12];
 	char serial_ext[12];
 	char type_ext[12];
+} __ec_align4;
+
+/**
+ * struct ec_response_battery_static_info_v2 - hostcmd v2 battery static info
+ *
+ * Equivalent to struct ec_response_battery_static_info, but with strings
+ * further lengthened (relative to v1) to accommodate the maximum string length
+ * permitted by the Smart Battery Data Specification revision 1.1 and fields
+ * renamed to better match that specification.
+ *
+ * @design_capacity: battery design capacity (in mAh)
+ * @design_voltage: battery design voltage (in mV)
+ * @cycle_count: battery cycle count
+ * @manufacturer: battery manufacturer string
+ * @device_name: battery model string
+ * @serial: battery serial number string
+ * @chemistry: battery type string
+ */
+struct ec_response_battery_static_info_v2 {
+	uint16_t design_capacity;
+	uint16_t design_voltage;
+	uint32_t cycle_count;
+	char manufacturer[SBS_MAX_STR_OBJ_SIZE];
+	char device_name[SBS_MAX_STR_OBJ_SIZE];
+	char serial[SBS_MAX_STR_OBJ_SIZE];
+	char chemistry[SBS_MAX_STR_OBJ_SIZE];
 } __ec_align4;
 
 /*
